@@ -1,0 +1,283 @@
+// 1. Bootstrap importieren
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+// 2. Variablen
+$card-bg: #f8f9fa;
+$font-main: 'Segoe UI', Roboto, sans-serif;
+
+$nutri-score-size: 80px;
+$score-size-sm: 56px;
+$score-size-md: 64px;
+
+$product-image-max-md: 240px;
+$product-image-max-sm: 160px;
+
+$header-lightblue: #a0c3e4e0;
+
+$bp-sm: 576px;
+$bp-md: 768px;
+
+// 3. Utility Mixins und Platzhalter
+@mixin below($px) {
+  @media (max-width: $px) {
+    @content;
+  }
+}
+
+@mixin between($min, $max) {
+  @media (min-width: $min) and (max-width: $max) {
+    @content;
+  }
+}
+
+%card-base {
+  width: 100%;
+  background-color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+
+@mixin image-fit($max-height, $fit: contain) {
+  width: 100%;
+  max-height: $max-height;
+  object-fit: $fit;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// 4. Basis-Styles
+body {
+  background-color: $card-bg;
+  font-family: $font-main;
+  margin: 0;
+  padding: 0;
+}
+
+h1,
+h2 {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+h1 {
+  color: #dce8f1;
+  background-color: #070605;
+}
+
+h2 {
+  color: #121412;
+  background-color: #ffffff;
+}
+
+// 5. Layout-Gitter
+.app-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  padding: 1.5rem;
+}
+
+// 6. Suchbereich
+.search-area {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  text-align: center;
+
+  input {
+    padding: 0.5rem;
+  }
+
+  .button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+// 7. Ergebnisbereich 
+.result-area {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .card {
+    @extend %card-base;
+    max-width: 400px;
+    background-color: #fff;
+
+    // Produktbild
+    img {
+      @include image-fit($product-image-max-md);
+    }
+
+    .card-body {
+      padding: 1rem 1.25rem;
+    }
+
+    .card-title {
+      font-weight: 600;
+      margin-bottom: 0.75rem;
+    }
+
+    .card-text {
+      font-size: 0.95rem;
+      color: #444;
+    }
+  }
+}
+
+// 8. Produktbild & Score-Komponenten (wiederverwendbar)
+.product-image {
+  @include image-fit($product-image-max-md);
+}
+
+%score-image {
+  display: inline-block;
+  height: auto;
+}
+
+.score-image {
+  @extend %score-image;
+  max-width: $nutri-score-size;
+}
+
+img[alt="Nutri-Score"] {
+  max-width: $nutri-score-size;
+}
+
+.score-wrapper {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+// Damit Score-Bilder untereinander erscheinen
+.score-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+// Stil für Produktname (größer als andere Angaben)
+.product-name {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+}
+
+// 9. Navbar hellblau (nicht invasiv — neue Klasse empfohlen)
+.navbar-lightblue {
+  background-color: $header-lightblue !important;
+  color: #719ec3;
+
+  .navbar-brand {
+    color: #000000 !important;
+  }
+
+  .nav-link {
+    color: rgba(0, 0, 0, 0.85) !important;
+  }
+}
+
+// 10. Responsive Anpassungen (zentral)
+@include below($bp-sm) {
+  .result-area .card {
+    max-width: 100%;
+    padding: 0.75rem;
+  }
+
+  .product-image {
+    @include image-fit($product-image-max-sm);
+  }
+
+  .score-image {
+    max-width: $score-size-sm;
+  }
+
+  .card-title {
+    font-size: 1rem;
+  }
+
+  .list-group-item {
+    font-size: 0.95rem;
+    padding: 0.45rem 0.9rem;
+  }
+
+  .score-wrapper {
+    flex-direction: row;
+    justify-content: center;
+  }
+
+  .score-column {
+    gap: 0.25rem;
+  }
+
+  .product-name {
+    font-size: 1.125rem;
+    text-align: center;
+  }
+
+  .card {
+    padding: 0.6rem;
+  }
+}
+
+@include between($bp-sm + 1, $bp-md - 1) {
+  .product-image {
+    @include image-fit(200px);
+  }
+
+  .score-image {
+    max-width: $score-size-md;
+  }
+
+  .product-name {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: $bp-md) {
+  .app-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .search-area {
+    text-align: left;
+    align-items: start;
+
+    .button-group {
+      flex-direction: row;
+      justify-content: start;
+    }
+  }
+
+  .result-area {
+    padding: 2rem;
+    align-items: start;
+  }
+}
+
+// 11. Optional: kleine Utility-Klassen
+.text-muted-small {
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+#qr-reader { border-radius: 0.5rem; overflow: hidden; }
+#qr-reader.d-block { display: block; }
+#qr-status { color: #6c757d; }

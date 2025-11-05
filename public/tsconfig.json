@@ -1,0 +1,19 @@
+{
+  "compilerOptions": {
+    "target": "es2018",
+    "module": "es6",
+    "outDir": "./dist/js",
+    "rootDir": "./src",
+    "strict": true,
+    "lib": ["ES2018", "DOM"],
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "verbatimModuleSyntax": false,
+    "types": ["jquery"],
+
+    "esModuleInterop": true, //erlaubt Default‑Imports von CommonJS‑Modulen.
+    "allowSyntheticDefaultImports": true //sorgt für Kompatibilität, falls man ältere Imports hat.
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules"]
+}
