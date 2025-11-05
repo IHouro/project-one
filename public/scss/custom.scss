@@ -1,5 +1,5 @@
 // 1. Bootstrap importieren
-@import "../node_modules/bootstrap/scss/bootstrap";
+@use "bootstrap" as *;
 
 // 2. Variablen
 $card-bg: #f8f9fa;

@@ -1,5 +1,5 @@
 import $ from "jquery";
-// import "bootstrap";
+import "bootstrap";
 import "../scss/custom.scss";
 import { Html5Qrcode } from "html5-qrcode";
 
