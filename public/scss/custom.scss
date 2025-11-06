@@ -1,6 +1,4 @@
-// 1. Bootstrap importieren
-
-// 2. Variablen
+// Variablen
 $card-bg: #f8f9fa;
 $font-main: 'Segoe UI', Roboto, sans-serif;
 
@@ -16,11 +14,12 @@ $header-lightblue: #a0c3e4e0;
 $bp-sm: 576px;
 $bp-md: 768px;
 
+// Bootstrap importieren
  @import "../node_modules/bootstrap/scss/bootstrap";
 // @use "bootstrap" as *;
 
 
-// 3. Utility Mixins und Platzhalter
+// Utility Mixins und Platzhalter
 @mixin below($px) {
   @media (max-width: $px) {
     @content;
@@ -33,15 +32,6 @@ $bp-md: 768px;
   }
 }
 
-%card-base {
-  width: 100%;
-  background-color: #fff;
-  border: none;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  border-radius: 0.75rem;
-  overflow: hidden;
-}
-
 @mixin image-fit($max-height, $fit: contain) {
   width: 100%;
   max-height: $max-height;
@@ -51,7 +41,19 @@ $bp-md: 768px;
   margin-right: auto;
 }
 
-// 4. Basis-Styles
+%card-base {
+  width: 100%;
+  background-color: #fff;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-radius: 0.75rem;
+  overflow: hidden;
+}
+%score-image {
+  display: inline-block;
+  height: auto;
+}
+// Basis-Styles
 body {
   background-color: $card-bg;
   font-family: $font-main;
@@ -59,8 +61,7 @@ body {
   padding: 0;
 }
 
-h1,
-h2 {
+h1, h2 {
   text-align: center;
   margin-bottom: 1rem;
 }
@@ -75,7 +76,7 @@ h2 {
   background-color: #ffffff;
 }
 
-// 5. Layout-Gitter
+// Layout-Gitter
 .app-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -83,7 +84,7 @@ h2 {
   padding: 1.5rem;
 }
 
-// 6. Suchbereich
+// Suchbereich
 .search-area {
   display: flex;
   flex-direction: column;
@@ -101,11 +102,9 @@ h2 {
   }
 }
 
-// 7. Ergebnisbereich 
+// Ergebnisbereich 
 .result-area {
-  background: white;
-  border-radius: 0.5rem;
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.08);
+  @extend %card-base; // statt manuell Stylen
   padding: 1rem;
   display: flex;
   flex-direction: column;
@@ -114,7 +113,6 @@ h2 {
   .card {
     @extend %card-base;
     max-width: 400px;
-    background-color: #fff;
 
     // Produktbild
     img {
@@ -142,17 +140,9 @@ h2 {
   @include image-fit($product-image-max-md);
 }
 
-%score-image {
-  display: inline-block;
-  height: auto;
-}
 
 .score-image {
   @extend %score-image;
-  max-width: $nutri-score-size;
-}
-
-img[alt="Nutri-Score"] {
   max-width: $nutri-score-size;
 }
 
@@ -180,7 +170,7 @@ img[alt="Nutri-Score"] {
   margin-bottom: 0.5rem;
 }
 
-// 9. Navbar hellblau (nicht invasiv — neue Klasse empfohlen)
+// Navbar 
 .navbar-lightblue {
   background-color: $header-lightblue !important;
   color: #719ec3;
@@ -194,7 +184,7 @@ img[alt="Nutri-Score"] {
   }
 }
 
-// 10. Responsive Anpassungen (zentral)
+// Responsive Anpassungen (zentral)
 @include below($bp-sm) {
   .result-area .card {
     max-width: 100%;
@@ -273,12 +263,6 @@ img[alt="Nutri-Score"] {
     padding: 2rem;
     align-items: start;
   }
-}
-
-// 11. Optional: kleine Utility-Klassen
-.text-muted-small {
-  color: #6c757d;
-  font-size: 0.9rem;
 }
 
 #qr-reader { border-radius: 0.5rem; overflow: hidden; }

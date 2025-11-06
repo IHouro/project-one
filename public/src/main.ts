@@ -1,7 +1,5 @@
 import $ from "jquery";
-// import "bootstrap";
 import 'bootstrap/dist/js/bootstrap.bundle.min.js';
-
 import "../scss/custom.scss";
 import { Html5Qrcode } from "html5-qrcode";
 
@@ -11,11 +9,8 @@ let currentCameraId: string | null = null;
 
 //   Validierung: verhindert unnötige API-Aufrufe und gibt Feedback.
 function validateBarcode(raw: string) {
-  const val = (raw || "").trim();
-  if (!val) return { ok: false, message: "Bitte Barcode eingeben oder scannen." };
- // if (!/^\d+$/.test(val)) return { ok: false, message: "Nur Ziffern erlaubt." };
- // if (val.length !== 13) return { ok: false, message: "Ungültige Länge. Erwartet 13 Ziffern." }; // ÄNDERN!!!
-  return { ok: true, value: val };
+  const val = raw.trim(); // vorher: (raw || "").trim()
+  return val ? { ok: true, value: val } : { ok: false, message: "Bitte Barcode eingeben oder scannen." };
 }
 
 /* zentrale Meldungsfunktion */
@@ -26,36 +21,44 @@ function renderMessage(html: string) {
  //  Kamera-Scan mit autostop bei Treffer.
 async function startCameraScan(onResult: (code: string) => void): Promise<void> {
   const qrRegionId = "qr-reader";
+  const qrEl = document.getElementById(qrRegionId); // einmalig abfragen
+
   try {
     const devices = await Html5Qrcode.getCameras();
-    if (!devices || devices.length === 0) {
+    if (!devices?.length) {
       renderMessage(`<div class="alert alert-warning">Keine Kamera gefunden.</div>`);
       return;
     }
+
     currentCameraId = devices[0].id;
     if (!html5QrcodeScanner) html5QrcodeScanner = new Html5Qrcode(qrRegionId);
-    document.getElementById(qrRegionId)!.classList.remove("d-none");
+    qrEl?.classList.remove("d-none"); // optional chaining
 
-    const config: any = { fps: 10, qrbox: { width: 300, height: 120 }, experimentalFeatures: { useBarCodeDetectorIfSupported: true } };
+    const config = {
+      fps: 10,
+      qrbox: { width: 300, height: 120 },
+      experimentalFeatures: { useBarCodeDetectorIfSupported: true }
+    };
 
     await html5QrcodeScanner.start(
       { deviceId: { exact: currentCameraId } },
       config,
       (decodedText) => {
         onResult(decodedText);
-        void stopCameraScan(); // auto-stop nach Treffer
+        void stopCameraScan(); // auto-stop
       },
-      () => { /* Frame-Fehler ignorieren */ }
+      () => {} // Frame-Fehler ignorieren
     );
   } catch (err) {
     console.error("startCameraScan:", err);
-    renderMessage(`<div class="alert alert-warning">Kamera konnte nicht gestartet werden. Berechtigungen prüfen.</div>`); // Per Default?
+    renderMessage(`<div class="alert alert-warning">Kamera konnte nicht gestartet werden. Berechtigungen prüfen.</div>`);
     await stopCameraScan();
   }
 }
 
 async function stopCameraScan(): Promise<void> {
   const qrRegionId = "qr-reader";
+  const qrEl = document.getElementById(qrRegionId); 
   if (html5QrcodeScanner) {
     try { await html5QrcodeScanner.stop(); await html5QrcodeScanner.clear(); } catch { /* ignore */ }
     html5QrcodeScanner = null;
@@ -64,64 +67,65 @@ async function stopCameraScan(): Promise<void> {
 }
 
 
-//   Bild-Upload: einfache Logik für die meisten Fälle.
+//   Bild-Upload
 async function scanImageFileSimple(file: File): Promise<string | null> {
+  const scanner = Html5Qrcode as any; // einmaliges Casting
   try {
-    // einige Versionen bieten statische scanFile; probiere vorsichtig
-    // @ts-ignore
-    if (typeof (Html5Qrcode as any).scanFile === "function") {
-      // @ts-ignore
-      const r = await (Html5Qrcode as any).scanFile(file);
-      if (!r) return null;
-      if (Array.isArray(r) && r.length > 0) return r[0].decodedText || r[0].text || null;
-      return (r as any).decodedText || (r as any).text || null;
+    if (typeof scanner.scanFile === "function") {
+      const result = await scanner.scanFile(file);
+      if (Array.isArray(result)) return result[0]?.decodedText ?? result[0]?.text ?? null;
+      return result?.decodedText ?? result?.text ?? null;
     }
-  } catch (e) {
-    console.warn("static scanFile failed, fallback");
+  } catch {
+    console.warn("scanFile failed, fallback");
   }
 
   // Fallback: DataURL + instanz-Methoden falls verfügbar
-  const dataUrl = await new Promise<string>((res, rej) => {
+  const dataUrl = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
-    reader.onload = () => res(reader.result as string);
-    reader.onerror = () => rej(new Error("File read error"));
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = () => reject(new Error("File read error"));
     reader.readAsDataURL(file);
   });
 
-  const tempId = "qr-temp";
+const tempId = "qr-temp";
   let tempEl = document.getElementById(tempId);
-  let created = false;
-  if (!tempEl) { tempEl = document.createElement("div"); tempEl.id = tempId; tempEl.style.position = "fixed"; tempEl.style.left = "-10000px"; document.body.appendChild(tempEl); created = true; }
+  if (!tempEl) {
+    tempEl = document.createElement("div");
+    tempEl.id = tempId;
+    tempEl.style.position = "fixed";
+    tempEl.style.left = "-10000px";
+    document.body.appendChild(tempEl);
+  }
 
   let tempScanner: Html5Qrcode | null = null;
   try {
     tempScanner = new Html5Qrcode(tempId);
-    // @ts-ignore
-    if (typeof (tempScanner as any).scanFile === "function") {
-      // @ts-ignore
-      const r = await (tempScanner as any).scanFile(file);
-      if (r) { if (Array.isArray(r) && r.length > 0) return r[0].decodedText || r[0].text || null; return (r as any).decodedText || (r as any).text || null; }
+    const temp = tempScanner as any;
+
+    if (typeof temp.scanFile === "function") {
+      const result = await temp.scanFile(file);
+      if (Array.isArray(result)) return result[0]?.decodedText ?? result[0]?.text ?? null;
+      return result?.decodedText ?? result?.text ?? null;
     }
-    // @ts-ignore
-    if (typeof (tempScanner as any).decodeFromImage === "function") {
-      // @ts-ignore
-      const r2 = await (tempScanner as any).decodeFromImage(undefined, dataUrl);
-      if (r2 && (r2 as any).decodedText) return (r2 as any).decodedText;
+
+    if (typeof temp.decodeFromImage === "function") {
+      const result = await temp.decodeFromImage(undefined, dataUrl);
+      return result?.decodedText ?? null;
     }
-    return null;
   } catch (err) {
     console.warn("image decode fallback failed", err);
-    return null;
   } finally {
-    try { if (tempScanner && typeof (tempScanner as any).clear === "function") await (tempScanner as any).clear(); } catch {}
-    if (created && tempEl?.parentNode) tempEl.parentNode.removeChild(tempEl);
+    try { await (tempScanner as any)?.clear(); } catch {}
+    tempEl?.remove();
   }
-}
 
+  return null;
+}
 
   // DOMContentLoaded stellt sicher, dass Elemente existieren.
 document.addEventListener("DOMContentLoaded", () => {
-  const startBtn = document.getElementById("startCameraBtn");
+  const startBtn = document.getElementById("startCameraBtn") as HTMLButtonElement | null;
   const imageUpload = document.getElementById("imageUpload") as HTMLInputElement | null;
 
   if (startBtn) {
