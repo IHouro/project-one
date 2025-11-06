@@ -7,12 +7,12 @@ let html5QrcodeScanner: Html5Qrcode | null = null;
 let currentCameraId: string | null = null;
 
 
-//   Validierung: verhindert unnötige API-Aufrufe und gibt sofortiges UX-Feedback.
+//   Validierung: verhindert unnötige API-Aufrufe und gibt Feedback.
 function validateBarcode(raw: string) {
   const val = (raw || "").trim();
   if (!val) return { ok: false, message: "Bitte Barcode eingeben oder scannen." };
-  if (!/^\d+$/.test(val)) return { ok: false, message: "Nur Ziffern erlaubt." };
-  if (val.length !== 13) return { ok: false, message: "Ungültige Länge. Erwartet 13 Ziffern." };
+ // if (!/^\d+$/.test(val)) return { ok: false, message: "Nur Ziffern erlaubt." };
+ // if (val.length !== 13) return { ok: false, message: "Ungültige Länge. Erwartet 13 Ziffern." }; // ÄNDERN!!!
   return { ok: true, value: val };
 }
 
@@ -47,7 +47,7 @@ async function startCameraScan(onResult: (code: string) => void): Promise<void> 
     );
   } catch (err) {
     console.error("startCameraScan:", err);
-    renderMessage(`<div class="alert alert-warning">Kamera konnte nicht gestartet werden. Berechtigungen prüfen.</div>`);
+    renderMessage(`<div class="alert alert-warning">Kamera konnte nicht gestartet werden. Berechtigungen prüfen.</div>`); // Per Default?
     await stopCameraScan();
   }
 }
