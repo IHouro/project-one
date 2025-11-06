@@ -1,4 +1,0 @@
-export {};
-/** const message: string = "Hello TypeScript!";
-console.log(message); */ 
-//# sourceMappingURL=main.d.ts.map

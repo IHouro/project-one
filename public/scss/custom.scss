@@ -16,8 +16,8 @@ $header-lightblue: #a0c3e4e0;
 $bp-sm: 576px;
 $bp-md: 768px;
 
-// @import "../node_modules/bootstrap/scss/bootstrap";
-@use "bootstrap" as *;
+ @import "../node_modules/bootstrap/scss/bootstrap";
+// @use "bootstrap" as *;
 
 
 // 3. Utility Mixins und Platzhalter
